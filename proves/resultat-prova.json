@@ -1,12 +1,44 @@
 {
-  "quan": "2026-11-08T16:07:02.674Z",
+  "quan": "2026-11-08T16:09:09.824Z",
   "ruta": "79300->04104",
   "data": "2026-11-13",
-  "ok": false,
-  "trens": [],
+  "ok": true,
+  "trens": [
+    {
+      "tipo": "AVE",
+      "sale": "06:34",
+      "llega": "07:58",
+      "precio": 44.25,
+      "estado": "disponible"
+    },
+    {
+      "tipo": "AVE INT",
+      "sale": "11:54",
+      "llega": "13:22",
+      "precio": 31.75,
+      "estado": "disponible"
+    },
+    {
+      "tipo": "AVE",
+      "sale": "15:11",
+      "llega": "16:31",
+      "precio": 57.15,
+      "estado": "disponible"
+    },
+    {
+      "tipo": "AVE",
+      "sale": "17:51",
+      "llega": "19:12",
+      "precio": 88.9,
+      "estado": "disponible"
+    }
+  ],
   "log": [
     "renfe.com status 200",
     "cookies tancades",
-    "ERROR locator.click: Timeout 20000ms exceeded."
+    "solo ida: true",
+    "buscar enabled: true",
+    "venta url https://venta.renfe.com/vol/buscarTrenEnlaces.do?c=_P6X0",
+    "AVE trobats: 4"
   ]
 }
