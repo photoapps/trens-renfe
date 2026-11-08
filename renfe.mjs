@@ -18,8 +18,13 @@ export async function cercar(browser, origin, destination, date, debugName) {
     const r = await page.goto(url, { waitUntil: "domcontentloaded", timeout: 60000 });
     log.push(`renfe.com status ${r?.status()}`);
     // Cookies
-    const rej = page.getByRole("button", { name: /Rechazarlas todas/i }).first();
-    if (await rej.isVisible({ timeout: 8000 }).catch(() => false)) await rej.click();
+    // Avís de cookies: n'hi ha dues versions; acceptem només les tècniques / rebutgem.
+    await page.waitForTimeout(2500);
+    for (const nom of [/Permitir solo cookies t[eé]cnicas/i, /Rechazarlas todas/i]) {
+      const b = page.getByRole("button", { name: nom }).first();
+      if (await b.isVisible({ timeout: 3000 }).catch(() => false)) { await b.click(); log.push("cookies tancades"); break; }
+    }
+    await page.waitForTimeout(800);
     // Només anada
     await page.getByText("Solo ida", { exact: true }).first().click({ timeout: 20000 });
     const buscar = page.getByRole("button", { name: /Buscar billetes/i }).first();
