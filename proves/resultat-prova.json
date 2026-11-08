@@ -1,0 +1,11 @@
+{
+  "quan": "2026-11-08T15:58:23.192Z",
+  "ruta": "79300->04104",
+  "data": "2026-11-13",
+  "ok": false,
+  "trens": [],
+  "log": [
+    "renfe.com status 200",
+    "ERROR locator.click: Timeout 20000ms exceeded."
+  ]
+}
