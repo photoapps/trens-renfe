@@ -1,0 +1,55 @@
+name: Prova correu
+
+on:
+  push:
+    branches: [main]
+    paths: [".github/workflows/prova-correu.yml"]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  correu:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - run: npm init -y >/dev/null && npm install nodemailer@6.9.16
+      - name: Enviar correu de prova
+        env:
+          GMAIL_USER: ${{ secrets.GMAIL_USER }}
+          GMAIL_APP_PASSWORD: ${{ secrets.GMAIL_APP_PASSWORD }}
+          EMAIL_TO: ${{ secrets.EMAIL_TO }}
+        run: |
+          cat > prova.mjs <<'EOF'
+          import nodemailer from "nodemailer";
+          import fs from "node:fs";
+          const { GMAIL_USER, GMAIL_APP_PASSWORD } = process.env;
+          const to = process.env.EMAIL_TO || GMAIL_USER;
+          let res;
+          if (!GMAIL_USER || !GMAIL_APP_PASSWORD) res = { ok: false, error: "Falten els secrets GMAIL_USER o GMAIL_APP_PASSWORD" };
+          else {
+            try {
+              const t = nodemailer.createTransport({ host: "smtp.gmail.com", port: 465, secure: true, auth: { user: GMAIL_USER, pass: GMAIL_APP_PASSWORD } });
+              await t.sendMail({
+                from: `Trens Girona-Tarragona <${GMAIL_USER}>`, to,
+                subject: "✓ Prueba: los avisos del AVE funcionan",
+                text: "¡Hola!\n\nEste es un correo de prueba. Cuando baje el precio de algún AVE Girona ⇄ Camp de Tarragona del fin de semana elegido, te llegará un correo como este con el tren, el precio de antes y el de ahora, y el enlace para comprar.\n\n♥",
+              });
+              res = { ok: true, to: to.replace(/(.{2}).+@/, "$1…@") };
+            } catch (e) { res = { ok: false, error: String(e.message).slice(0, 200) }; }
+          }
+          fs.writeFileSync("prova-correu.json", JSON.stringify({ quan: new Date().toISOString(), ...res }, null, 2) + "\n");
+          console.log(res);
+          EOF
+          node prova.mjs
+      - name: Desar resultat
+        if: always()
+        run: |
+          git config user.name "trens-bot"
+          git config user.email "trens-bot@users.noreply.github.com"
+          git add prova-correu.json && git commit -m "Resultat prova correu [skip ci]" && git pull --rebase -q && git push || true
