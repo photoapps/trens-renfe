@@ -26,8 +26,20 @@ export async function cercar(browser, origin, destination, date, debugName) {
     }
     await page.waitForTimeout(800);
     // Només anada
-    await page.getByText("Solo ida", { exact: true }).first().click({ timeout: 20000 });
+    // "Solo ida": provem diverses maneres (ràdio, etiqueta, coordenades)
+    let fet = false;
+    for (const fn of [
+      () => page.getByRole("radio", { name: /Solo ida/i }).first().check({ force: true, timeout: 5000 }),
+      () => page.getByLabel(/Solo ida/i).first().check({ force: true, timeout: 5000 }),
+      () => page.locator('label:has-text("Solo ida")').first().click({ force: true, timeout: 5000 }),
+      async () => { const bb = await page.getByText(/^\s*Solo ida\s*$/).first().boundingBox({ timeout: 5000 }); if (!bb) throw new Error("sense caixa"); await page.mouse.click(bb.x - 20, bb.y + bb.height / 2); },
+    ]) {
+      try { await fn(); fet = true; break; } catch (e) { log.push("solo ida intent fallit: " + e.message.split("\n")[0].slice(0, 80)); }
+    }
+    log.push("solo ida: " + fet);
+    await page.waitForTimeout(800);
     const buscar = page.getByRole("button", { name: /Buscar billetes/i }).first();
+    log.push("buscar enabled: " + (await buscar.isEnabled().catch(() => "?")));
     for (let i = 0; i < 5; i++) {
       if (await buscar.isEnabled().catch(() => false)) break;
       await page.waitForTimeout(1000);
