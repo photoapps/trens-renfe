@@ -53,9 +53,12 @@ export async function cercar(browser, origin, destination, date, debugName) {
     await page.waitForTimeout(2000);
     const trens = await page.evaluate(() => {
       const out = [];
-      document.querySelectorAll('[aria-label^="Tipo de tren:"]').forEach((el) => {
-        const tipo = el.getAttribute("aria-label").replace("Tipo de tren: ", "").replace(/\.$/, "");
-        if (!/^AVE( INT)?$/.test(tipo)) return;
+      document.querySelectorAll('[aria-label^="Tipo de tren:"],[aria-label^="Tipos de tren:"]').forEach((el) => {
+        const lab = el.getAttribute("aria-label");
+        const enllac = lab.startsWith("Tipos");
+        const tipo = lab.replace(/Tipos? de tren: /, "").replace(/\.$/, "").replace(/ y /g, " + ");
+        // Directes: només AVE. Amb enllaç: tots (es mostren només si l'usuari ho tria).
+        if (!enllac && !/^AVE( INT)?$/.test(tipo)) return;
         let r = el;
         for (let i = 0; i < 15 && r; i++) {
           if (/Precio desde|Completo|no se encuentra disponible/.test(r.innerText || "")) break;
@@ -64,17 +67,19 @@ export async function cercar(browser, origin, destination, date, debugName) {
         const t = (r?.innerText || "").replace(/\s+/g, " ");
         const times = t.match(/\d\d:\d\d/g) || [];
         const p = (t.match(/Precio desde ([\d.,]+) €/) || [])[1];
+        const espera = (t.match(/Enlace ((?:\d+ horas? ?)?(?:\d+ minutos?)?)/) || [])[1] || null;
         out.push({
           tipo,
           sale: times[0],
           llega: times[1],
           precio: p ? Number(p.replace(/\./g, "").replace(",", ".")) : null,
           estado: p ? "disponible" : /Completo/.test(t) ? "Completo" : "No disponible",
+          ...(enllac ? { enllac: true, espera: espera ? espera.trim().replace(/minutos?/, "min").replace(/horas?/, "h") : null } : {}),
         });
       });
       return out;
     });
-    log.push(`AVE trobats: ${trens.length}`);
+    log.push(`trens trobats: ${trens.length} (directes AVE: ${trens.filter((x) => !x.enllac).length})`);
     if (!trens.length && debugName) {
       await page.screenshot({ path: `${debugName}.png`, fullPage: true }).catch(() => {});
       fs.writeFileSync(`${debugName}.txt`, (await page.innerText("body").catch(() => "")).slice(0, 4000));

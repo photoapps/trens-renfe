@@ -19,6 +19,8 @@ const avui = madrid(), dema = sumaDies(avui, 1);
 const proximDivendres = () => { let f = dema; while (new Date(f + "T12:00:00Z").getUTCDay() !== 5) f = sumaDies(f, 1); return f; };
 const eur = (n) => n.toLocaleString("es-ES", { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + " €";
 const diaCurt = (f) => new Date(f + "T12:00:00Z").toLocaleDateString("es-ES", { weekday: "short", day: "numeric", month: "short", timeZone: "UTC" });
+// Clau d'un tren: els directes per hora de sortida; els d'enllaç, hora + tipus.
+const clau = (t) => (t.enllac ? `${t.sale}|${t.tipo}` : t.sale);
 const compra = (o, d, f) => `https://www.renfe.com/es/es/buscador-billetes?origin=${o}&destination=${d}&departure-date=${f}`;
 
 async function sb(path, opts = {}) {
@@ -39,11 +41,13 @@ async function enviarCorreu(assumpte, text) {
 
 const main = async () => {
   if (!CLAVE) throw new Error("Falta el secret SUPABASE_CLAVE");
-  const aj = (await sb("/rest/v1/ajustes?select=setmanes,trenes_ida,trenes_vuelta&id=eq.1"))[0] || {};
-  let divendres = (aj.setmanes || []).filter((f) => typeof f === "string" && f >= dema).sort().slice(0, 10);
+  const aj = (await sb("/rest/v1/ajustes?select=*&id=eq.1"))[0] || {};
+  const dissabte = aj.dia_anada === "ds"; // anada el dissabte en lloc del divendres
+  const ambEnllacos = !!aj.enllacos;      // avisar també dels trens amb enllaç
+  let divendres = (aj.setmanes || []).filter((f) => typeof f === "string" && sumaDies(f, dissabte ? 1 : 0) >= dema).sort().slice(0, 10);
   if (!divendres.length) divendres = [proximDivendres()];
   const feines = divendres.flatMap((f) => [
-    { ruta: "ida", fecha: f, o: GIRONA, d: CAMP, nom: "Ida Girona→Tarragona" },
+    { ruta: "ida", fecha: sumaDies(f, dissabte ? 1 : 0), o: GIRONA, d: CAMP, nom: "Ida Girona→Tarragona" },
     { ruta: "vuelta", fecha: sumaDies(f, 2), o: CAMP, d: GIRONA, nom: "Vuelta Tarragona→Girona" },
   ]);
 
@@ -57,17 +61,22 @@ const main = async () => {
     console.log(f.nom, f.fecha, res.log.join(" | "));
     if (!res.ok) { resum.push(`${f.nom} ${diaCurt(f.fecha)}: no s'han pogut llegir els preus`); continue; }
     const amb = res.trens.filter((t) => typeof t.precio === "number");
-    const min = amb.length ? amb.reduce((a, b) => (b.precio < a.precio ? b : a)) : null;
+    const directes = amb.filter((t) => !t.enllac);
+    const min = directes.length ? directes.reduce((a, b) => (b.precio < a.precio ? b : a)) : null;
     files.push({ ruta: f.ruta, fecha: f.fecha, ts, min: min?.precio ?? null, salida: min?.sale ?? null, trenes: res.trens });
     const ant = hist.filter((h) => h.ruta === f.ruta && h.fecha === f.fecha).pop();
-    const prev = Object.fromEntries((ant?.trenes || []).map((t) => [t.sale, t.precio]));
+    const prev = Object.fromEntries((ant?.trenes || []).map((t) => [clau(t), t.precio]));
     const fav = (f.ruta === "ida" ? aj.trenes_ida : aj.trenes_vuelta) || [];
     for (const t of amb) {
-      if (typeof prev[t.sale] === "number" && t.precio < prev[t.sale]) {
-        baixades.push({ fav: fav.includes(t.sale), text: `${f.nom}, ${diaCurt(f.fecha)} · AVE ${t.sale}: ${eur(t.precio)} (antes ${eur(prev[t.sale])})`, link: compra(f.o, f.d, f.fecha) });
+      if (t.enllac && !ambEnllacos) continue;
+      const k = clau(t);
+      if (typeof prev[k] === "number" && t.precio < prev[k]) {
+        const nomTren = t.enllac ? `${t.sale} con enlace (${t.tipo})` : `AVE ${t.sale}`;
+        baixades.push({ fav: fav.includes(k), text: `${f.nom}, ${diaCurt(f.fecha)} · ${nomTren}: ${eur(t.precio)} (antes ${eur(prev[k])})`, link: compra(f.o, f.d, f.fecha) });
       }
     }
-    resum.push(`${f.nom} ${diaCurt(f.fecha)}: ` + res.trens.map((t) => `${t.sale} ${typeof t.precio === "number" ? eur(t.precio) : t.estado}`).join(" · "));
+    const vis = res.trens.filter((t) => !t.enllac || ambEnllacos);
+    resum.push(`${f.nom} ${diaCurt(f.fecha)}: ` + vis.map((t) => `${t.sale}${t.enllac ? "*" : ""} ${typeof t.precio === "number" ? eur(t.precio) : t.estado}`).join(" · ") + (ambEnllacos ? " (* con enlace)" : ""));
   }
   await browser.close();
 
