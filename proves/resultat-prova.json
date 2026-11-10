@@ -1,0 +1,174 @@
+{
+  "quan": "2026-11-10T11:14:35.174Z",
+  "ruta": "79300->04104",
+  "data": "2026-11-14",
+  "ok": true,
+  "trens": [
+    {
+      "tipo": "AVE + ALVIA",
+      "sale": "05:44",
+      "llega": "08:14",
+      "precio": 28,
+      "estado": "disponible",
+      "enllac": true,
+      "espera": "1 h 15 min"
+    },
+    {
+      "tipo": "MD + ALVIA",
+      "sale": "07:14",
+      "llega": "09:39",
+      "precio": 29.3,
+      "estado": "disponible",
+      "enllac": true,
+      "espera": "25 min"
+    },
+    {
+      "tipo": "MD + AVANT",
+      "sale": "07:14",
+      "llega": "09:39",
+      "precio": 29.35,
+      "estado": "disponible",
+      "enllac": true,
+      "espera": "25 min"
+    },
+    {
+      "tipo": "AVE + AVE",
+      "sale": "08:09",
+      "llega": "10:26",
+      "precio": 48.1,
+      "estado": "disponible",
+      "enllac": true,
+      "espera": "1 h 5 min"
+    },
+    {
+      "tipo": "AVANT + AVE",
+      "sale": "08:09",
+      "llega": "10:26",
+      "precio": 54.7,
+      "estado": "disponible",
+      "enllac": true,
+      "espera": "1 h 5 min"
+    },
+    {
+      "tipo": "REGIONAL + AVE",
+      "sale": "09:39",
+      "llega": "12:31",
+      "precio": 47.1,
+      "estado": "disponible",
+      "enllac": true,
+      "espera": "50 min"
+    },
+    {
+      "tipo": "REGIONAL + AVANT",
+      "sale": "09:39",
+      "llega": "12:31",
+      "precio": null,
+      "estado": "Completo",
+      "enllac": true,
+      "espera": "50 min"
+    },
+    {
+      "tipo": "MD + AVE INT",
+      "sale": "10:19",
+      "llega": "13:22",
+      "precio": 28.3,
+      "estado": "disponible",
+      "enllac": true,
+      "espera": "1 h 10 min"
+    },
+    {
+      "tipo": "AVANT + AVE",
+      "sale": "11:48",
+      "llega": "14:31",
+      "precio": 33.3,
+      "estado": "disponible",
+      "enllac": true,
+      "espera": "1 h 31 min"
+    },
+    {
+      "tipo": "AVANT + AVANT",
+      "sale": "05:44",
+      "llega": "08:14",
+      "precio": 28,
+      "estado": "disponible",
+      "enllac": true,
+      "espera": "1 h 15 min"
+    },
+    {
+      "tipo": "MD + ALVIA",
+      "sale": "12:19",
+      "llega": "15:07",
+      "precio": 23.2,
+      "estado": "disponible",
+      "enllac": true,
+      "espera": "52 min"
+    },
+    {
+      "tipo": "REGIONAL + AVE",
+      "sale": "13:39",
+      "llega": "16:15",
+      "precio": null,
+      "estado": "No disponible",
+      "enllac": true,
+      "espera": "31 min"
+    },
+    {
+      "tipo": "REGIONAL + AVE",
+      "sale": "13:39",
+      "llega": "16:15",
+      "precio": null,
+      "estado": "No disponible",
+      "enllac": true,
+      "espera": "31 min"
+    },
+    {
+      "tipo": "AVE",
+      "sale": "15:11",
+      "llega": "16:31",
+      "precio": 38.1,
+      "estado": "disponible"
+    },
+    {
+      "tipo": "REGIONAL + AVANT EX",
+      "sale": "15:39",
+      "llega": "18:25",
+      "precio": 26.3,
+      "estado": "disponible",
+      "enllac": true,
+      "espera": "40 min"
+    },
+    {
+      "tipo": "AVANT + EUROMED",
+      "sale": "16:58",
+      "llega": "18:49",
+      "precio": 40.9,
+      "estado": "disponible",
+      "enllac": true,
+      "espera": "35 min"
+    },
+    {
+      "tipo": "AVE",
+      "sale": "17:51",
+      "llega": "19:12",
+      "precio": 25.4,
+      "estado": "disponible"
+    },
+    {
+      "tipo": "MD + AVANT",
+      "sale": "18:19",
+      "llega": "20:40",
+      "precio": 29.35,
+      "estado": "disponible",
+      "enllac": true,
+      "espera": "25 min"
+    }
+  ],
+  "log": [
+    "renfe.com status 200",
+    "cookies tancades",
+    "solo ida: true",
+    "buscar enabled: true",
+    "venta url https://venta.renfe.com/vol/buscarTrenEnlaces.do?c=_xAur",
+    "trens trobats: 18 (directes AVE: 2)"
+  ]
+}
